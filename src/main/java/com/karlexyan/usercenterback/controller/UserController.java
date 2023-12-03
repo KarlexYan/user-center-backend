@@ -1,5 +1,8 @@
 package com.karlexyan.usercenterback.controller;
 
+import com.karlexyan.usercenterback.common.BaseResponse;
+import com.karlexyan.usercenterback.common.ErrorCode;
+import com.karlexyan.usercenterback.common.ResultUtils;
 import com.karlexyan.usercenterback.model.User;
 import com.karlexyan.usercenterback.model.domain.request.UserDeleteRequest;
 import com.karlexyan.usercenterback.model.domain.request.UserLoginRequest;
@@ -24,74 +27,84 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    public Long userRegister(@RequestBody UserRegisterRequest userRegisterRequest){
+    public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest){
         if(userRegisterRequest == null){
-            return null;
+            return ResultUtils.error(ErrorCode.NULL_ERROR);
         }
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
         if(StringUtils.isAnyBlank(userAccount,userPassword,checkPassword)){
-            return null;
+            return ResultUtils.error(ErrorCode.NULL_ERROR);
         }
-        return userService.userRegister(userAccount,userPassword,checkPassword);
+
+        long result = userService.userRegister(userAccount, userPassword, checkPassword);
+        return ResultUtils.success(result);
     }
 
     @PostMapping("/login")
-    public User userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request){
+    public BaseResponse<User> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request){
         if(userLoginRequest == null){
-            return null;
+            return ResultUtils.error(ErrorCode.NULL_ERROR);
         }
         String userAccount = userLoginRequest.getUserAccount();
         String userPassword = userLoginRequest.getUserPassword();
         if(StringUtils.isAnyBlank(userAccount,userPassword)){
-            return null;
+            return ResultUtils.error(ErrorCode.NULL_ERROR);
         }
-        return userService.userLogin(userAccount, userPassword,request);
+
+        User user = userService.userLogin(userAccount, userPassword, request);
+        return ResultUtils.success(user);
     }
 
     @PostMapping("/outLogin")
-    public Integer userOutLogin(HttpServletRequest request){
+    public BaseResponse<Integer> userOutLogin(HttpServletRequest request){
         if(request==null){
-            return null;
+            return ResultUtils.error(ErrorCode.NULL_ERROR);
         }
-        return userService.userOutLogin(request);
+        int result = userService.userOutLogin(request);
+        return ResultUtils.success(result);
     }
 
     @GetMapping("/currentUser")
-    public User getCurrentUser(HttpServletRequest request){
+    public BaseResponse<User> getCurrentUser(HttpServletRequest request){
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATUS);
         User currentUser = (User) userObj;
         if(currentUser==null){
-            return null;
+            return ResultUtils.error(ErrorCode.NULL_ERROR);
         }
         Long userId = currentUser.getUserId();
-        return userService.getCurrentUser(userId);
+        User user = userService.getCurrentUser(userId);
+        return ResultUtils.success(user);
     }
 
     @GetMapping("/search")
-    public List<User> searchUsers(String userName, HttpServletRequest request){
+    public BaseResponse<List<User>> searchUsers(String userName, HttpServletRequest request){
         // 仅管理员可查询
         if(!this.isAdmin(request)){
-            return new ArrayList<>();
+            return ResultUtils.error(ErrorCode.NO_AUTH);
         }
 
-        return userService.searchUser(userName,request);
+        List<User> users = userService.searchUser(userName, request);
+
+        return ResultUtils.success(users);
     }
 
     @PostMapping("/delete")
-    public boolean deleteUser(@RequestBody UserDeleteRequest userDeleteRequest, HttpServletRequest request){
+    public BaseResponse<Boolean> deleteUser(@RequestBody UserDeleteRequest userDeleteRequest, HttpServletRequest request){
         // 仅管理员可查询
         if(!this.isAdmin(request)){
-            return false;
+            return ResultUtils.error(ErrorCode.NO_AUTH);
         }
 
         Long userId = userDeleteRequest.getUserId();
 
         if(userId <= 0){
-            return false;
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR);
         }
-        return userService.deleteById(userId);
+        boolean result = userService.deleteById(userId);
+
+        return ResultUtils.success(result);
     }
 
     /**
@@ -102,6 +115,6 @@ public class UserController {
     public boolean isAdmin(HttpServletRequest request){
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATUS);
         User user = (User) userObj;
-        return user != null && user.getUserRole() == ADMIN_USER;
+        return user != null && user.getUserRole() .equals(ADMIN_USER) ;
     }
 }

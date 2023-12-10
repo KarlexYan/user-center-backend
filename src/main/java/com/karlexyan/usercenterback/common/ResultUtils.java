@@ -1,5 +1,6 @@
 package com.karlexyan.usercenterback.common;
 
+
 /**
  * 返回工具类
  */
@@ -17,11 +18,24 @@ public class ResultUtils {
 
     /**
      * 失败
+     *
      * @param errorCode 枚举类
      * @return 通用返回类
      */
-    public static BaseResponse error(ErrorCode errorCode){
+    public static BaseResponse error(ErrorCode errorCode) {
         return new BaseResponse(errorCode);
+    }
+
+    public static BaseResponse error(ErrorCode errorCode, String message, String description) {
+        return new BaseResponse(errorCode.getCode(), null, message, description);
+    }
+
+    public static BaseResponse error(ErrorCode errorCode, String description) {
+        return new BaseResponse(errorCode.getCode(), null, errorCode.getMsg(), description);
+    }
+
+    public static BaseResponse error(Integer code, String message, String description) {
+        return new BaseResponse(code, null, message, description);
     }
 
 }

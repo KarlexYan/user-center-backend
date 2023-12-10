@@ -2,6 +2,8 @@ package com.karlexyan.usercenterback.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.karlexyan.usercenterback.common.ErrorCode;
+import com.karlexyan.usercenterback.exception.BusinessException;
 import com.karlexyan.usercenterback.model.User;
 import com.karlexyan.usercenterback.service.UserService;
 import com.karlexyan.usercenterback.mapper.UserMapper;
@@ -42,15 +44,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 1.校验
         // 非空
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
-            return -1;
+            throw new BusinessException(ErrorCode.NULL_ERROR,"参数有误");
         }
         // 账号不少于4位
         if (userAccount.length() < 4) {
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账号不能少于4位");
         }
         // 密码不少于6位
         if (userPassword.length() < 6 || checkPassword.length() < 6) {
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"密码不能少于6位");
         }
 
         // 账户不包含特殊字符 使用正则表达式校验
@@ -58,12 +60,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         Pattern pattern = Pattern.compile(regex);
         boolean flag = pattern.matcher(userAccount).matches();
         if (!flag) {
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账户不能包含特殊字符");
         }
 
-        // 校验密码和密码相同
+        // 校验密码和密码不相同
         if (!userPassword.equals(checkPassword)) {
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"校验密码和密码不相同");
         }
 
         // 账户不能重复注册
@@ -71,7 +73,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         queryWrapper.eq("user_account", userAccount);
         long count = userMapper.selectCount(queryWrapper);
         if (count > 0) {
-            return -1;
+            throw new BusinessException(ErrorCode.USER_ACCOUNT_EXIST);
         }
 
         // 2.加密  (通过加盐加密)
@@ -83,7 +85,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         user.setUserPassword(encryptPassword);
         boolean result = this.save(user);
         if (!result) {
-            return -1;
+            throw new BusinessException(ErrorCode.USER_REGISTER_FAIL);
         }
 
         return user.getUserId();
@@ -94,15 +96,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 1.校验
         // 非空
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
-            return null;
+            throw new BusinessException(ErrorCode.NULL_ERROR,"参数有误");
         }
         // 账号不少于4位
         if (userAccount.length() < 4) {
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账户不能少于4位");
         }
         // 密码不少于6位
         if (userPassword.length() < 6) {
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"密码不能少于6位");
         }
 
         // 账户不包含特殊字符 使用正则表达式校验
@@ -110,7 +112,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         Pattern pattern = Pattern.compile(regex);
         boolean flag = pattern.matcher(userAccount).matches();
         if (!flag) {
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账户不能包含特殊字符");
         }
 
         // 2.加密  (通过加盐加密)
@@ -124,7 +126,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 用户不存在
         if (user == null) {
             log.info("user login failed. userAccount cannot match userPassword");
-            return null;
+            throw new  BusinessException(ErrorCode.USER_NOT_EXISTS,"用户不存在");
         }
 
         // 4.脱敏
@@ -158,7 +160,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Override
     public User getSafetyUser(User originUser) {
         if(originUser == null){
-            return null;
+            throw new BusinessException(ErrorCode.NULL_ERROR,"参数有误");
         }
         User safetyUser = new User();
         safetyUser.setUserId(originUser.getUserId());
@@ -179,7 +181,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public User getCurrentUser(long id) {
         User user = userMapper.selectById(id);
         if(user==null){
-            return null;
+            throw new BusinessException(ErrorCode.NULL_ERROR,"参数有误");
         }
         return getSafetyUser(user);
     }

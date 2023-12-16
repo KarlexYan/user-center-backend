@@ -14,13 +14,13 @@ public class BusinessException extends RuntimeException{
     }
 
     public BusinessException(ErrorCode errorCode){
-        super(errorCode.getMsg());
+        super(errorCode.getMessage());
         this.code = errorCode.getCode();
-        this.description = errorCode.getDesc();
+        this.description = errorCode.getDescription();
     }
 
     public BusinessException(ErrorCode errorCode,String description){
-        super(errorCode.getMsg());
+        super(errorCode.getMessage());
         this.code = errorCode.getCode();
         this.description = description;
     }

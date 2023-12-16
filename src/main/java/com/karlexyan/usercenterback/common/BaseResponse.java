@@ -11,29 +11,29 @@ import java.io.Serializable;
 @Data
 public class BaseResponse<T> implements Serializable {
     private int code;
-    private String msg;
+    private String message;
     private T data;
-    private String desc;
+    private String description;
 
-    public BaseResponse(int code,  T data,String msg,String desc) {
+    public BaseResponse(int code, T data, String message, String description) {
         this.code = code;
-        this.msg = msg;
+        this.message = message;
         this.data = data;
-        this.desc = desc;
+        this.description = description;
     }
 
-    public BaseResponse(int code, T data,String msg) {
+    public BaseResponse(int code, T data, String message) {
         this.code = code;
         this.data = data;
-        this.msg = msg;
+        this.message = message;
     }
 
-    public BaseResponse(int code, String msg) {
+    public BaseResponse(int code, String message) {
         this.code = code;
-        this.msg = msg;
+        this.message = message;
     }
 
     public BaseResponse(ErrorCode errorCode){
-        this(errorCode.getCode(),null,errorCode.getMsg(),errorCode.getDesc());
+        this(errorCode.getCode(), null, errorCode.getMessage(), errorCode.getDescription());
     }
 }

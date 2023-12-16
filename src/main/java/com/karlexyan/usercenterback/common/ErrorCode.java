@@ -22,27 +22,27 @@ public enum ErrorCode {
     /**
      * 状态码信息
      */
-    private final String msg;
+    private final String message;
     /**
      * 状态码信息详细
      */
-    private final String desc;
+    private final String description;
 
-    ErrorCode(int code, String msg, String desc) {
+    ErrorCode(int code, String message, String description) {
         this.code = code;
-        this.msg = msg;
-        this.desc = desc;
+        this.message = message;
+        this.description = description;
     }
 
     public int getCode() {
         return code;
     }
 
-    public String getMsg() {
-        return msg;
+    public String getMessage() {
+        return message;
     }
 
-    public String getDesc() {
-        return desc;
+    public String getDescription() {
+        return description;
     }
 }

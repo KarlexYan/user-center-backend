@@ -31,7 +31,7 @@ public class ResultUtils {
     }
 
     public static BaseResponse error(ErrorCode errorCode, String description) {
-        return new BaseResponse(errorCode.getCode(), null, errorCode.getMsg(), description);
+        return new BaseResponse(errorCode.getCode(), null, errorCode.getMessage(), description);
     }
 
     public static BaseResponse error(Integer code, String message, String description) {
